@@ -1,0 +1,78 @@
+<script>
+let apps = JSON.parse(localStorage.getItem("apps") || "[]");
+
+// SAFE element getter
+function el(id){
+  return document.getElementById(id);
+}
+
+function submitApp(){
+  const n = el("name").value;
+  const r = el("reason").value;
+
+  if(!n || !r){
+    alert("Fill everything");
+    return;
+  }
+
+  apps.push({id:Date.now(), name:n, reason:r, status:"pending"});
+  localStorage.setItem("apps", JSON.stringify(apps));
+
+  el("name").value="";
+  el("reason").value="";
+
+  alert("Submitted!");
+}
+
+function login(){
+  const u = el("adminUser").value;
+  const p = el("adminPass").value;
+
+  if(u==="admin" && p==="1234"){
+    el("status").innerText="Logged in";
+    el("panel").style.display="block";
+    loadApps();
+  } else {
+    el("status").innerText="Wrong login";
+  }
+}
+
+function loadApps(){
+  const box = el("apps");
+  box.innerHTML="";
+
+  apps.forEach(a=>{
+    const div = document.createElement("div");
+    div.className="card";
+
+    div.innerHTML=`
+      <b>${a.name}</b>
+      <p>${a.reason}</p>
+      <span class="badge ${a.status}">${a.status}</span><br>
+      <button onclick="update(${a.id},'accepted')">Accept</button>
+      <button onclick="update(${a.id},'denied')">Deny</button>
+    `;
+
+    box.appendChild(div);
+  });
+}
+
+function update(id,status){
+  apps = apps.map(a=>{
+    if(a.id===id) a.status=status;
+    return a;
+  });
+
+  localStorage.setItem("apps", JSON.stringify(apps));
+  loadApps();
+}
+
+function toggleTheme(){
+  document.body.classList.toggle("light");
+}
+
+// RUN AFTER PAGE LOAD (IMPORTANT FIX)
+window.onload = function(){
+  loadApps();
+}
+</script>
